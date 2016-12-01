@@ -43,6 +43,10 @@ class Pile
 	 */
 	private $messageId = "";
 
+	/**
+	 * [$count description]
+	 * @var integer
+	 */
 	private $count = 0;
 
 	/**
@@ -84,7 +88,6 @@ class Pile
  	 */
 	private function populateMsgAttr($attrName, $attrValue)
 	{
-
 		if(v::stringType()->notEmpty()->validate($attrValue)){
 			$attrTypeValidated = "String";
 			$result = $this->addMessageAttribute($attrName,$attrValue,$attrTypeValidated);
@@ -247,45 +250,57 @@ class Pile
 		return $this;
 	}
 
-	public function countMessage(){
+	/**
+	 * [countMessage description]
+	 * @return [type] [description]
+	 */
+	public function countMessage()
+	{
 		if($this->count == 10){
-		throw new RunTimeException("Attributed setted is higher than 10");
+			throw new RunTimeException("Attributed setted is higher than 10");
 		}else{
-		$this->count++;	
+			$this->count++;	
 		}
 	}
 
-	public function configSqsBatch(){
-
+	/**
+	 * [configSqsBatch description]
+	 * @return [type] [description]
+	 */
+	public function configSqsBatch()
+	{
 		if(!v::stringType()->notEmpty()->validate($this->queueUrl)){
 			throw new RunTimeException("Invalid queueUrl.  Paramenter not setted!");
 		}
-		
-					$this->messageAttributes;
+		$this->messageAttributes;
 	}
 
-	public function setBatchMessage(){
-	
+	/**
+	 * [setBatchMessage description]
+	 */
+	public function setBatchMessage()
+	{
 		$this->getQueueUrl()
-		 ->configSqsBatch();
+			->configSqsBatch();
 	}
 
 	/**
 	 * Construct the array to be setted and sended by aws
 	 * @return [type] [description]
 	 */
-	public function configBatch(){
+	public function configBatch()
+	{
 		$idmd5 = md5($this->messageId = rand(10,100)); 
-
 		$this->queueObjToSendBatch = array(
 			"QueueUrl"=> $this->queueUrl,
 			"Entries" => array(
-					array(
-					"Id" => $idmd5,
-					"MessageBody" => $this->messageBody,
-					"DelaySeconds" => $this->delaySeconds,
+				array(
+					"Id"                => $idmd5,
+					"MessageBody"       => $this->messageBody,
+					"DelaySeconds"      => $this->delaySeconds,
 					"MessageAttributes" => $this->messageAttributes)
-			));
+				)
+			);
 		return $this->queueObjToSendBatch;
 	}
 
@@ -293,10 +308,9 @@ class Pile
 	 * Send message attributes and message body to queue up to 10 attributtes
 	 * @return Object returned by Aws\Sqs\SqsClient sendMessage method
 	 */
-	public function sendBatch(){
-
-		$batch = $this->configBatch();	
-		
+	public function sendBatch()
+	{
+		$batch    = $this->configBatch();		
 		$sqs      = $this->getSqsClient();
 		$callback = $sqs->sendMessageBatch($this->queueObjToSendBatch);
 
@@ -306,8 +320,8 @@ class Pile
 	 * Send message attributes and message body to the queue named
 	 * @return Object 	Object returned by Aws\Sqs\SqsClient sendMessage method
 	 */
-	public function send(){
-		
+	public function send()
+	{
 		$teste = $this->getQueueUrl()
 			->configSqsObj();
 
