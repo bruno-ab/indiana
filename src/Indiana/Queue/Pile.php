@@ -43,6 +43,8 @@ class Pile
 	 */
 	private $messageId = "";
 
+	private $count = 0;
+
 	/**
 	 * Message body to send to the queue.
 	 * This is required by the queue, so we need to pass some String value to it.
@@ -86,11 +88,11 @@ class Pile
 		if(v::stringType()->notEmpty()->validate($attrValue)){
 			$attrTypeValidated = "String";
 			$result = $this->addMessageAttribute($attrName,$attrValue,$attrTypeValidated);
-		}elseif(v::intType()->notEmpty()->validate($attrValue)){
+		}elseif(v::intType()->notEmpty()->validate($attrValue) || ($attrValue === 0)){
 			$attrTypeValidated = "Number";	
 			$result = $this->addMessageAttribute($attrName,$attrValue,$attrTypeValidated);
 		}else{
-			throw new RuntimeException("Invalid attribute attrType for \'$attrType\'setted.");
+			throw new RunTimeException("Invalid attribute attrType for \'$attrType\'setted.");
 		}
 		return $result;
 	}
@@ -105,7 +107,7 @@ class Pile
 	private function addMessageAttribute($attrName,$attrValue,$attrTypeValidated)
 	{
 		if(array_key_exists($attrName, $this->messageAttributes)){
-			throw new RuntimeException("Invalid attribute \'$attrName\' for messageAttributes array. Key name already setted!");
+			throw new RunTimeException("Invalid attribute \'$attrName\' for messageAttributes array. Key name already setted!");
 		}
 		$this->messageAttributes[$attrName] = [
 			"StringValue" =>$attrValue, 
@@ -136,7 +138,7 @@ class Pile
 	private function configSqsObj()
 	{
 		if(!v::stringType()->notEmpty()->validate($this->queueUrl)){
-			throw new RuntimeException("Invalid queueUrl.  Paramenter not setted!");
+			throw new RunTimeException("Invalid queueUrl.  Paramenter not setted!");
 		}
 
 		$this->queueObjToSend = array(
@@ -171,7 +173,7 @@ class Pile
 		if(v::stringType()->notEmpty()->validate($sqsApiVersion)){
 			$this->sqsApiVersion = $sqsApiVersion;
 		} else {
-			throw new RuntimeException("Invalid string value to sqsApiVersion parameter.");
+			throw new RunTimeException("Invalid string value to sqsApiVersion parameter.");
 		}
 		return $this;
 	}
@@ -186,7 +188,7 @@ class Pile
 		if(v::stringType()->notEmpty()->validate($region)){
 			$this->awsRegion = $region;
 		} else {
-			throw new RuntimeException("Invalid string value to region parameter.");
+			throw new RunTimeException("Invalid string value to region parameter.");
 		}
 		return $this;
 	}
@@ -201,7 +203,7 @@ class Pile
 		if(v::intType()->notEmpty()->validate($delaySeconds)){
 			$this->delaySeconds = $delaySeconds;
 		} else {
-			throw new RuntimeException("Invalid integer value to delaySeconds parameter.");
+			throw new RunTimeException("Invalid integer value to delaySeconds parameter.");
 		}
 		return $this;
 	}
@@ -215,7 +217,7 @@ class Pile
 		if(v::stringType()->notEmpty()->validate($queueName)){
 			$this->queueName = $queueName;
 		} else {
-			throw new RuntimeException("Invalid string value to queueName parameter.");
+			throw new RunTimeException("Invalid string value to queueName parameter.");
 		}
 		return $this;
 	}
@@ -227,26 +229,36 @@ class Pile
 	 * @return Object 			Itself
 	 */
 	public function setAttr($name, $value)
-	{		
-		if(v::stringType()->notEmpty()->validate($name) && v::notEmpty()->validate($value)){
+	{	
+
+	$this->countMessage();
+
+		if(v::stringType()->notEmpty()->validate($name) && isset($value)){
 			if(v::stringType()->validate($value)){
 				$this->populateMsgAttr($name, $value);	
-			}else if(v::intType()->intVal()->validate($value)){
+			}else if(v::intType()->intVal()->validate($value) || ($value === 0)){
 				$this->populateMsgAttr($name, $value);
 			}else{
-				throw new RuntimeException("Invalid attribute name for $name: $value setted.");
+				throw new RunTimeException("Invalid attribute name for $name: $value setted.");
 			}
 		}else{
-			throw new RuntimeException("Invalid attributes name and value. Was setted: '$name' and '$value'");
+			throw new RunTimeException("Invalid attributes name and value. Was setted: '$name' and '$value'");
 		}
 		return $this;
 	}
 
+	public function countMessage(){
+		if($this->count == 10){
+		throw new RunTimeException("Attributed setted is higher than 10");
+		}else{
+		$this->count++;	
+		}
+	}
 
 	public function configSqsBatch(){
 
 		if(!v::stringType()->notEmpty()->validate($this->queueUrl)){
-			throw new RuntimeException("Invalid queueUrl.  Paramenter not setted!");
+			throw new RunTimeException("Invalid queueUrl.  Paramenter not setted!");
 		}
 		
 					$this->messageAttributes;
@@ -258,6 +270,10 @@ class Pile
 		 ->configSqsBatch();
 	}
 
+	/**
+	 * Construct the array to be setted and sended by aws
+	 * @return [type] [description]
+	 */
 	public function configBatch(){
 		$idmd5 = md5($this->messageId = rand(10,100)); 
 
@@ -271,9 +287,12 @@ class Pile
 					"MessageAttributes" => $this->messageAttributes)
 			));
 		return $this->queueObjToSendBatch;
-
 	}
 
+	/**
+	 * Send message attributes and message body to queue up to 10 attributtes
+	 * @return Object returned by Aws\Sqs\SqsClient sendMessage method
+	 */
 	public function sendBatch(){
 
 		$batch = $this->configBatch();	
@@ -288,6 +307,7 @@ class Pile
 	 * @return Object 	Object returned by Aws\Sqs\SqsClient sendMessage method
 	 */
 	public function send(){
+		
 		$teste = $this->getQueueUrl()
 			->configSqsObj();
 
@@ -296,5 +316,4 @@ class Pile
 
 		return $callback;
 	}
-
 }
