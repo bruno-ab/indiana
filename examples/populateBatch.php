@@ -22,7 +22,15 @@ $array = [
 	"nameBatch9"  => "valueBatch9",
 	"nameBatch10" => "valueBatch10"		
 ];
+<<<<<<< HEAD
 
+=======
+/**
+ * [$value description]
+ * @var $count [integer]
+ * must be setted at maximum 10
+ */
+>>>>>>> release/v1.0
 foreach($array as $value => $key){
 
 	$pile->setAttr($value,$key)
@@ -33,4 +41,8 @@ foreach($array as $value => $key){
 		$count = 0;
 	}
 	$count++;
+<<<<<<< HEAD
 } 
+=======
+}
+>>>>>>> release/v1.0

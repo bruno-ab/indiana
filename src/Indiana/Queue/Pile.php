@@ -44,6 +44,15 @@ class Pile
 	private $messageId = "";
 
 	/**
+<<<<<<< HEAD
+=======
+	 * [$messageIdGroup description]
+	 * @var array
+	 */
+	private $messageIdGroup = array();
+
+	/**
+>>>>>>> release/v1.0
 	 * [$count description]
 	 * @var integer
 	 */
@@ -83,6 +92,15 @@ class Pile
 	private $queueObjToSend = array();
 
 	/**
+	 * [getIdGroup description]
+	 * @return [type] [description]
+	 */
+	public function getIdGroup()
+	{
+		return  $this->messageAttributes
+	}
+
+	/**
 	 * Verifiy te type of DataType and set String or Number
 	 * @return Array 	Data will be increased in messageAttributes var
  	 */
@@ -113,8 +131,8 @@ class Pile
 			throw new RunTimeException("Invalid attribute \'$attrName\' for messageAttributes array. Key name already setted!");
 		}
 		$this->messageAttributes[$attrName] = [
-			"StringValue" =>$attrValue, 
-			"DataType" => $attrTypeValidated
+			"StringValue"	=>	$attrValue, 
+			"DataType" 		=> 	$attrTypeValidated
 		];
 		return $this->messageAttributes; 
 	}
@@ -143,11 +161,10 @@ class Pile
 		if(!v::stringType()->notEmpty()->validate($this->queueUrl)){
 			throw new RunTimeException("Invalid queueUrl.  Paramenter not setted!");
 		}
-
 		$this->queueObjToSend = array(
-			"QueueUrl"=> $this->queueUrl,
-			"MessageBody" => $this->messageBody,
-			"DelaySeconds" => $this->delaySeconds,
+			"QueueUrl"			=> $this->queueUrl,
+			"MessageBody" 		=> $this->messageBody,
+			"DelaySeconds"	 	=> $this->delaySeconds,
 			'MessageAttributes' => $this->messageAttributes
 		);
 	}
@@ -233,9 +250,7 @@ class Pile
 	 */
 	public function setAttr($name, $value)
 	{	
-
-	$this->countMessage();
-
+		$this->countMessage();
 		if(v::stringType()->notEmpty()->validate($name) && isset($value)){
 			if(v::stringType()->validate($value)){
 				$this->populateMsgAttr($name, $value);	
@@ -272,7 +287,11 @@ class Pile
 		if(!v::stringType()->notEmpty()->validate($this->queueUrl)){
 			throw new RunTimeException("Invalid queueUrl.  Paramenter not setted!");
 		}
+<<<<<<< HEAD
 		$this->messageAttributes;
+=======
+			$this->messageAttributes;
+>>>>>>> release/v1.0
 	}
 
 	/**
@@ -281,7 +300,21 @@ class Pile
 	public function setBatchMessage()
 	{
 		$this->getQueueUrl()
+<<<<<<< HEAD
 			->configSqsBatch();
+=======
+		->configSqsBatch();
+	}
+
+	/**
+	 * [saveId description]
+	 * @param  [type] $id [description]
+	 * @return [type]     [description]
+	 */
+	public function saveId($id)
+	{
+		$this->messageIdGroup[] = $id;
+>>>>>>> release/v1.0
 	}
 
 	/**
@@ -291,6 +324,7 @@ class Pile
 	public function configBatch()
 	{
 		$idmd5 = md5($this->messageId = rand(10,100)); 
+<<<<<<< HEAD
 		$this->queueObjToSendBatch = array(
 			"QueueUrl"=> $this->queueUrl,
 			"Entries" => array(
@@ -298,6 +332,16 @@ class Pile
 					"Id"                => $idmd5,
 					"MessageBody"       => $this->messageBody,
 					"DelaySeconds"      => $this->delaySeconds,
+=======
+		$this->saveId($idmd5);
+		$this->queueObjToSendBatch = array(
+			"QueueUrl"=> $this->queueUrl,
+			"Entries" => array(
+					array(
+					"Id" 				=> $idmd5,
+					"MessageBody" 		=> $this->messageBody,
+					"DelaySeconds" 		=> $this->delaySeconds,
+>>>>>>> release/v1.0
 					"MessageAttributes" => $this->messageAttributes)
 				)
 			);
@@ -310,12 +354,19 @@ class Pile
 	 */
 	public function sendBatch()
 	{
+<<<<<<< HEAD
 		$batch    = $this->configBatch();		
 		$sqs      = $this->getSqsClient();
 		$callback = $sqs->sendMessageBatch($this->queueObjToSendBatch);
 
+=======
+		$batch 		= $this->configBatch();	
+		$sqs      	= $this->getSqsClient();
+		$callback 	= $sqs->sendMessageBatch($this->queueObjToSendBatch);
+>>>>>>> release/v1.0
 		return $callback;	
 	}
+	
 	/**
 	 * Send message attributes and message body to the queue named
 	 * @return Object 	Object returned by Aws\Sqs\SqsClient sendMessage method
@@ -323,11 +374,9 @@ class Pile
 	public function send()
 	{
 		$teste = $this->getQueueUrl()
-			->configSqsObj();
-
+		->configSqsObj();
 		$sqs      = $this->getSqsClient();
 		$callback = $sqs->sendMessage($this->queueObjToSend);
-
 		return $callback;
-	}
+	}	
 }

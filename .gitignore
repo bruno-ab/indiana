@@ -1,2 +1,6 @@
 /vendor/
+<<<<<<< HEAD
+=======
+/examples/Courier.php
+>>>>>>> release/v1.0
 composer.lock
